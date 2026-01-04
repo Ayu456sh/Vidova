@@ -73,7 +73,8 @@ const Upload = () => {
         } catch (err) {
             console.error(err);
             setStatus('idle');
-            toast.error(err.response?.data?.message || 'Upload failed. Are you logged in?');
+            const errorMessage = err.response?.data?.message || err.message || 'Upload failed. Are you logged in?';
+            toast.error(errorMessage);
         }
     };
 

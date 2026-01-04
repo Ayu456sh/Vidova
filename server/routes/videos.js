@@ -11,7 +11,7 @@ const { uploadVideo, streamVideo, getVideos, getVideoById } = require('../contro
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         // Ensure this directory exists in server/server.js or manually
-        cb(null, 'uploads/');
+        cb(null, path.join(__dirname, '../uploads'));
     },
     filename: (req, file, cb) => {
         // Add timestamp to filename to avoid duplicates
