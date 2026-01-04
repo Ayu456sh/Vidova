@@ -16,9 +16,9 @@ services:
       - key: GEMINI_API_KEY
         sync: false
 
+staticSites:
   # Frontend Service
-  - type: static
-    name: vidova-client
+  - name: vidova-client
     root: client
     buildCommand: npm install && npm run build
     publish: dist
