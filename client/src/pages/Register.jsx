@@ -11,8 +11,8 @@ const Register = () => {
         username: '',
         email: '',
         password: '',
-        organizationId: '', // Optional for multi-tenancy grouping
-        role: 'Editor' // Defaulting to Editor for this demo so they can upload
+        organizationId: '',
+        role: 'Editor'
     });
     
     const { login } = useAuth();

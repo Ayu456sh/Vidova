@@ -16,7 +16,6 @@ const Upload = () => {
     const onDrop = useCallback((acceptedFiles) => {
         const selectedFile = acceptedFiles[0];
         if (selectedFile) {
-            // Simple client-side validation for video type
             if (!selectedFile.type.startsWith('video/')) {
                 toast.error("Please upload a valid video file.");
                 return;
@@ -39,7 +38,7 @@ const Upload = () => {
         setStatus('uploading');
         const formData = new FormData();
         formData.append('video', file);
-        // Get token from localStorage
+        
         const token = localStorage.getItem('token');
 
         if (!token) {
@@ -64,14 +63,11 @@ const Upload = () => {
             setStatus('analyzing');
             console.log('Upload success:', res.data);
 
-            // The socket event will trigger the final success notification globally
-            // But we can also listen here locally if we wanted to change UI state based on *this specific* video
-            // For now, I'll rely on global toast or manual reset after a few seconds
             setTimeout(() => {
                 setFile(null);
                 setStatus('completed');
                 setUploadProgress(0);
-            }, 6000); // Reset after analisis roughly done
+            }, 6000);
 
         } catch (err) {
             console.error(err);

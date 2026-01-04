@@ -8,9 +8,6 @@ const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
 
-// @desc    Upload video & Start Mock Analysis
-// @route   POST /api/videos/upload
-// @access  Private
 const uploadVideo = async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'Please upload a video file' });
@@ -19,7 +16,6 @@ const uploadVideo = async (req, res) => {
     const { title } = req.body;
 
     try {
-        // 1. Create Video Record
         const video = await Video.create({
             title: title || req.file.originalname,
             filename: req.file.filename,
@@ -31,33 +27,27 @@ const uploadVideo = async (req, res) => {
 
         res.status(201).json(video);
 
-        // 2. Real AI Analysis (Gemini)
-        // We do this asynchronously so the client gets the upload success immediately
         (async () => {
             try {
-                console.log(`[AI] Starting analysis for ${video.filename}...`);
+                console.log(`Analyzing: ${video.filename}...`);
 
-                // A. Upload to Gemini
                 const uploadResult = await fileManager.uploadFile(req.file.path, {
                     mimeType: req.file.mimetype,
                     displayName: video.title,
                 });
                 const fileUri = uploadResult.file.uri;
-                console.log(`[AI] Uploaded to Gemini: ${fileUri}`);
+                console.log(`Gemini Upload URI: ${fileUri}`);
 
-                // B. Wait for processing to complete
                 let file = await fileManager.getFile(uploadResult.file.name);
                 while (file.state === "PROCESSING") {
-                    console.log("[AI] Processing video...");
                     await new Promise((resolve) => setTimeout(resolve, 2000)); // Check every 2s
                     file = await fileManager.getFile(uploadResult.file.name);
                 }
 
                 if (file.state === "FAILED") {
-                    throw new Error("Video processing failed by Gemini");
+                    throw new Error("Video processing failed.");
                 }
 
-                // C. Analyze with Gemini 1.5 Flash
                 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
                 const prompt = "Analyze this video for NSFW, violence, or sensitive content. Determine if it is 'Safe' or 'Flagged'. Provide JSON output: { \"sensitivity\": \"Safe\" | \"Flagged\", \"reason\": \"brief explanation\" }";
 
@@ -67,34 +57,25 @@ const uploadVideo = async (req, res) => {
                 ]);
 
                 const responseText = result.response.text();
-                // Clean markdown code blocks if present
                 const jsonStr = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
                 const analysis = JSON.parse(jsonStr);
 
-                console.log(`[AI] Analysis Result:`, analysis);
-
-                // D. Update DB
+                // Update DB
                 const updatedVideo = await Video.findByIdAndUpdate(
                     video._id,
                     {
                         status: 'Completed',
                         sensitivity: analysis.sensitivity,
-                        // Could save 'reason' if we added that field to model
                     },
                     { new: true }
                 );
 
-                // E. Emit Socket Event
                 if (req.io) {
                     req.io.emit('video_processed', updatedVideo);
                 }
 
-                // F. Cleanup (Optional: Delete from Gemini to save space)
-                // await fileManager.deleteFile(uploadResult.file.name);
-
             } catch (err) {
-                console.error('[AI] Error during analysis:', err);
-                // Mark as error in DB
+                console.error('Analysis error:', err);
                 const errorVideo = await Video.findByIdAndUpdate(
                     video._id, 
                     { status: 'Error' },

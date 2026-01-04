@@ -25,7 +25,6 @@ const Dashboard = () => {
         } catch (err) {
             console.error(err);
             if (err.response && err.response.status === 401) {
-                // Redirect to login if unauthorized
                 window.location.href = '/login';
             }
             setLoading(false);
@@ -36,14 +35,12 @@ const Dashboard = () => {
         fetchVideos();
     }, []);
 
-    // Listen for real-time updates to refresh the list without reload
     useEffect(() => {
         if (!socket) return;
         socket.on('video_processed', (updatedVideo) => {
             setVideos((prev) =>
                 prev.map(v => v._id === updatedVideo._id ? updatedVideo : v)
             );
-            // Or just re-fetch to catch new uploads if we weren't adding them optmistically
             fetchVideos();
         });
         return () => socket.off('video_processed');
