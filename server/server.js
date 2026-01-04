@@ -60,10 +60,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Root Route
-app.get('/', (req, res) => {
-    res.send('API is running successfully');
-});
+
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
