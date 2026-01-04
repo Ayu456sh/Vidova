@@ -31,7 +31,8 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const res = await axios.post('http://localhost:5001/api/auth/register', formData);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+            const res = await axios.post(`${API_URL}/api/auth/register`, formData);
             
             const userData = res.data;
             login(userData);

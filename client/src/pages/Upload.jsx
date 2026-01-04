@@ -59,7 +59,8 @@ const Upload = () => {
         };
 
         try {
-            const res = await axios.post('http://localhost:5001/api/videos/upload', formData, config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+            const res = await axios.post(`${API_URL}/api/videos/upload`, formData, config);
             setStatus('analyzing');
             console.log('Upload success:', res.data);
 

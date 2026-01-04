@@ -19,7 +19,8 @@ const Dashboard = () => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const res = await axios.get('http://localhost:5001/api/videos', config);
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+            const res = await axios.get(`${API_URL}/api/videos`, config);
             setVideos(res.data);
             setLoading(false);
         } catch (err) {
