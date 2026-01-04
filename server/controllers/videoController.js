@@ -48,7 +48,7 @@ const uploadVideo = async (req, res) => {
                     throw new Error("Video processing failed.");
                 }
 
-                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
                 const prompt = "Analyze this video for NSFW, violence, or sensitive content. Determine if it is 'Safe' or 'Flagged'. Provide JSON output: { \"sensitivity\": \"Safe\" | \"Flagged\", \"reason\": \"brief explanation\" }";
 
                 const result = await model.generateContent([
